@@ -28,6 +28,7 @@
     [showButton addTarget:self action:@selector(showAction:) forControlEvents:UIControlEventTouchUpInside];
     [self.window.rootViewController.view addSubview:showButton];
 
+    [KGModal sharedInstance].responsiveToKeyboard = YES;
     [KGModal sharedInstance].closeButtonType = KGModalCloseButtonTypeRight;
     
     [self.window makeKeyAndVisible];
@@ -54,16 +55,16 @@
     CGRect infoLabelRect = CGRectInset(contentView.bounds, 5, 5);
     infoLabelRect.origin.y = CGRectGetMaxY(welcomeLabelRect)+5;
     infoLabelRect.size.height -= CGRectGetMinY(infoLabelRect) + 50;
-    UILabel *infoLabel = [[UILabel alloc] initWithFrame:infoLabelRect];
+    UITextView *infoLabel = [[UITextView alloc] initWithFrame:infoLabelRect];
     infoLabel.text = @"KGModal is an easy drop in control that allows you to display any view "
     "in a modal popup. The modal will automatically scale to fit the content view "
     "and center it on screen with nice animations!";
-    infoLabel.numberOfLines = 6;
+//    infoLabel.numberOfLines = 6;
     infoLabel.textColor = [UIColor whiteColor];
     infoLabel.textAlignment = NSTextAlignmentCenter;
     infoLabel.backgroundColor = [UIColor clearColor];
-    infoLabel.shadowColor = [UIColor blackColor];
-    infoLabel.shadowOffset = CGSizeMake(0, 1);
+//    infoLabel.shadowColor = [UIColor blackColor];
+//    infoLabel.shadowOffset = CGSizeMake(0, 1);
     [contentView addSubview:infoLabel];
     
     CGFloat btnY = CGRectGetMaxY(infoLabelRect)+5;
@@ -81,6 +82,8 @@
     UIButton *btn = (UIButton *) sender;
     KGModal*modal = [KGModal sharedInstance];
     KGModalCloseButtonType type = modal.closeButtonType;
+    
+    [modal endEditing:NO];
     
     if (KGModalCloseButtonTypeLeft == type) {
         modal.closeButtonType = KGModalCloseButtonTypeRight;

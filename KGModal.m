@@ -9,10 +9,38 @@
 #import "KGModal.h"
 #import <QuartzCore/QuartzCore.h>
 
+#pragma mark - Utils for Keyboard response
+
+#define swap(a, b) do{typeof(a) odd13var=a; a=b; b=odd13var;}while(0)
+
+@interface UIView (FirstResponder)
+- (UIView *)findFirstResponder;
+@end
+
+@implementation UIView (FirstResponder)
+
+- (UIView *)findFirstResponder
+{
+    if (self.isFirstResponder)
+        return self;
+    
+    for (UIView *subView in self.subviews) {
+        UIView *firstResponder = [subView findFirstResponder];
+        
+        if (firstResponder != nil) {
+            return firstResponder;
+        }
+    }
+    return nil;
+}
+@end
+
+#pragma mark -
+
 CGFloat const kFadeInAnimationDuration = 0.3;
 CGFloat const kTransformPart1AnimationDuration = 0.2;
 CGFloat const kTransformPart2AnimationDuration = 0.1;
-CGFloat const kDefaultCloseButtonPadding = 17.0;
+CGFloat const kDefaultPadding = 17.0;
 
 NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
 
@@ -75,13 +103,92 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
         
         CGRect closeFrame = self.closeButton.frame;
         if (closeButtonType == KGModalCloseButtonTypeRight) {
-            closeFrame.origin.x = self.containerView.frame.size.width-kDefaultCloseButtonPadding-closeFrame.size.width/2;
+            closeFrame.origin.x = self.containerView.frame.size.width-kDefaultPadding-closeFrame.size.width/2;
         } else {
             closeFrame.origin.x = 0;
         }
         self.closeButton.frame = closeFrame;
     }
 }
+
+#pragma mark - Methods for Keyboard response
+
+-(void)setResponsiveToKeyboard:(BOOL)responsiveToKeyboard {
+    _responsiveToKeyboard = responsiveToKeyboard;
+    
+    // Clear anything before
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+    
+    // Add if needed
+    if(responsiveToKeyboard){
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyboardWasShown:)
+                                                     name:UIKeyboardDidShowNotification
+                                                   object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(keyboardWillBeHidden:)
+                                                     name:UIKeyboardWillHideNotification
+                                                   object:nil];
+    }
+}
+
+-(void) _adjustPositionForKeyboard:(CGSize) keyboardSize inTime:(double) duration {
+    CGRect containerViewRect = self.containerView.frame;
+    CGRect freeScreen = self.window.bounds;
+    
+    if (UIDeviceOrientationIsLandscape(self.window.rootViewController.interfaceOrientation)) {
+        swap(freeScreen.size.width, freeScreen.size.height);
+    }
+    
+    // TODO: could be more accurate
+    // Simple go through. Should work on 99% cases, but may have exceptions anyways.
+    freeScreen.size.height -= keyboardSize.height;
+    CGFloat newY = (freeScreen.size.height - containerViewRect.size.height)/2 + freeScreen.origin.y;
+    
+    // A threshhold to check if animation really needed
+    if (ABS(newY - containerViewRect.origin.y) < 2) {
+        containerViewRect.origin.y = newY;
+        self.containerView.frame = containerViewRect;
+    } else {
+        containerViewRect.origin.y = newY;
+        UIView *container = self.containerView;
+        [UIView animateWithDuration:duration
+                         animations:^{
+                             container.frame = containerViewRect;
+                         }];
+    }
+}
+
+-(void) keyboardWasShown:(NSNotification *) aNotification {
+    UIView *selectedView = [self.containerView findFirstResponder];
+    // Do only this modal contains the firstResponder
+    if (selectedView) {
+        CGSize keyboardSize = [[[aNotification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
+        if (UIDeviceOrientationIsLandscape(self.window.rootViewController.interfaceOrientation))
+            swap(keyboardSize.width, keyboardSize.height);
+        
+        if ([selectedView respondsToSelector:@selector(inputAccessoryView)]) {
+            UIView *accessoryView =  [selectedView inputAccessoryView];
+            if (accessoryView) {
+                keyboardSize = CGSizeMake(keyboardSize.width,
+                                          keyboardSize.height + accessoryView.frame.size.height);
+            }
+        }
+        
+        double animDuration = [[[aNotification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+        
+        [self _adjustPositionForKeyboard:keyboardSize inTime:animDuration];
+    }
+}
+
+-(void) keyboardWillBeHidden:(NSNotification *) aNotification {
+    double animDuration = [[[aNotification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    
+    [self _adjustPositionForKeyboard:CGSizeZero inTime:animDuration];
+}
+
+#pragma mark -
 
 - (void)showWithContentView:(UIView *)contentView{
     [self showWithContentView:contentView andAnimated:YES];
@@ -105,8 +212,7 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
     self.window.rootViewController = viewController;
     self.viewController = viewController;
     
-    CGFloat padding = 17;
-    CGRect containerViewRect = CGRectInset(contentView.bounds, -padding, -padding);
+    CGRect containerViewRect = CGRectInset(contentView.bounds, -kDefaultPadding, -kDefaultPadding);
     containerViewRect.origin.x = containerViewRect.origin.y = 0;
     containerViewRect.origin.x = round(CGRectGetMidX(self.window.bounds)-CGRectGetMidX(containerViewRect));
     containerViewRect.origin.y = round(CGRectGetMidY(self.window.bounds)-CGRectGetMidY(containerViewRect));
@@ -115,7 +221,7 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
     containerView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|
     UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleBottomMargin;
     containerView.layer.rasterizationScale = [[UIScreen mainScreen] scale];
-    contentView.frame = (CGRect){padding, padding, contentView.bounds.size};
+    contentView.frame = (CGRect){kDefaultPadding, kDefaultPadding, contentView.bounds.size};
     [containerView addSubview:contentView];
     [viewController.view addSubview:containerView];
     self.containerView = containerView;
@@ -130,6 +236,9 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tapCloseAction:)
                                                  name:KGModalGradientViewTapped object:nil];
+    
+    // Force adding keyboard observers if needed
+    [self setResponsiveToKeyboard:self.responsiveToKeyboard];
     
     // The window has to be un-hidden on the main thread
     // This will cause the window to display
@@ -224,6 +333,10 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
         _modalBackgroundColor = modalBackgroundColor;
         self.containerView.modalBackgroundColor = modalBackgroundColor;
     }
+}
+
+-(void)endEditing:(BOOL)force {
+    [self.containerView endEditing:force];
 }
 
 - (void)dealloc{

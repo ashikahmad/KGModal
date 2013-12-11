@@ -21,6 +21,8 @@ typedef NS_ENUM(NSUInteger, KGModalCloseButtonType) {
 
 @interface KGModal : NSObject
 
+@property (nonatomic) BOOL responsiveToKeyboard;
+
 // Determines if the modal should dismiss if the user taps outside of the modal view
 // Defaults to YES
 @property (nonatomic) BOOL tapOutsideToDismiss;
@@ -74,5 +76,8 @@ typedef NS_ENUM(NSUInteger, KGModalCloseButtonType) {
 // Hide the modal and whether the modal should animate away,
 // run the completion after the modal is hidden
 - (void)hideAnimated:(BOOL)animated withCompletionBlock:(void(^)())completion;
+
+// Send endEditing message to containing view
+-(void) endEditing:(BOOL) force;
 
 @end
