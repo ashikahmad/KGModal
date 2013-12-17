@@ -13,26 +13,8 @@
 
 #define swap(a, b) do{typeof(a) odd13var=a; a=b; b=odd13var;}while(0)
 
-@interface UIView (FirstResponder)
-- (UIView *)findFirstResponder;
-@end
-
-@implementation UIView (FirstResponder)
-
-- (UIView *)findFirstResponder
-{
-    if (self.isFirstResponder)
-        return self;
-    
-    for (UIView *subView in self.subviews) {
-        UIView *firstResponder = [subView findFirstResponder];
-        
-        if (firstResponder != nil) {
-            return firstResponder;
-        }
-    }
-    return nil;
-}
+@interface UIView (KGFirstResponder)
+- (UIView *)kgFindFirstResponder;
 @end
 
 #pragma mark -
@@ -161,7 +143,7 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
 }
 
 -(void) keyboardWasShown:(NSNotification *) aNotification {
-    UIView *selectedView = [self.containerView findFirstResponder];
+    UIView *selectedView = [self.containerView kgFindFirstResponder];
     // Do only this modal contains the firstResponder
     if (selectedView) {
         CGSize keyboardSize = [[[aNotification userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
@@ -519,3 +501,24 @@ NSString *const KGModalGradientViewTapped = @"KGModalGradientViewTapped";
 }
 
 @end
+
+#pragma mark -
+
+@implementation UIView (KGFirstResponder)
+
+- (UIView *)kgFindFirstResponder
+{
+    if (self.isFirstResponder)
+        return self;
+    
+    for (UIView *subView in self.subviews) {
+        UIView *firstResponder = [subView kgFindFirstResponder];
+        
+        if (firstResponder != nil) {
+            return firstResponder;
+        }
+    }
+    return nil;
+}
+@end
+

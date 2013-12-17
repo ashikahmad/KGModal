@@ -52,25 +52,22 @@
     welcomeLabel.shadowOffset = CGSizeMake(0, 1);
     [contentView addSubview:welcomeLabel];
 
-    CGRect infoLabelRect = CGRectInset(contentView.bounds, 5, 5);
-    infoLabelRect.origin.y = CGRectGetMaxY(welcomeLabelRect)+5;
-    infoLabelRect.size.height -= CGRectGetMinY(infoLabelRect) + 50;
-    UITextView *infoLabel = [[UITextView alloc] initWithFrame:infoLabelRect];
-    infoLabel.text = @"KGModal is an easy drop in control that allows you to display any view "
+    CGRect infoTextRect = CGRectInset(contentView.bounds, 5, 5);
+    infoTextRect.origin.y = CGRectGetMaxY(welcomeLabelRect)+5;
+    infoTextRect.size.height -= CGRectGetMinY(infoTextRect) + 50;
+    UITextView *infoText = [[UITextView alloc] initWithFrame:infoTextRect];
+    infoText.text = @"KGModal is an easy drop in control that allows you to display any view "
     "in a modal popup. The modal will automatically scale to fit the content view "
     "and center it on screen with nice animations!";
-//    infoLabel.numberOfLines = 6;
-    infoLabel.textColor = [UIColor whiteColor];
-    infoLabel.textAlignment = NSTextAlignmentCenter;
-    infoLabel.backgroundColor = [UIColor clearColor];
-//    infoLabel.shadowColor = [UIColor blackColor];
-//    infoLabel.shadowOffset = CGSizeMake(0, 1);
-    [contentView addSubview:infoLabel];
+    infoText.textColor = [UIColor whiteColor];
+    infoText.textAlignment = NSTextAlignmentCenter;
+    infoText.backgroundColor = [UIColor clearColor];
+    [contentView addSubview:infoText];
     
-    CGFloat btnY = CGRectGetMaxY(infoLabelRect)+5;
+    CGFloat btnY = CGRectGetMaxY(infoTextRect)+5;
     CGFloat btnH = CGRectGetMaxY(contentView.frame)-5 - btnY;
     UIButton *btn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    btn.frame = CGRectMake(infoLabelRect.origin.x, btnY, infoLabelRect.size.width, btnH);
+    btn.frame = CGRectMake(infoTextRect.origin.x, btnY, infoTextRect.size.width, btnH);
     [btn setTitle:@"Close Button Right" forState:UIControlStateNormal];
     [btn addTarget:self action:@selector(changeCloseButtonType:) forControlEvents:UIControlEventTouchUpInside];
     [contentView addSubview:btn];
