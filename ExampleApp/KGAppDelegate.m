@@ -58,10 +58,11 @@
     UITextView *infoText = [[UITextView alloc] initWithFrame:infoTextRect];
     infoText.text = @"KGModal is an easy drop in control that allows you to display any view "
     "in a modal popup. The modal will automatically scale to fit the content view "
-    "and center it on screen with nice animations!";
-    infoText.textColor = [UIColor whiteColor];
+    "and center it on screen with nice animations!\n"
+    "(Tap here and then tap button below)";
+    infoText.textColor = [UIColor blackColor];
     infoText.textAlignment = NSTextAlignmentCenter;
-    infoText.backgroundColor = [UIColor clearColor];
+    infoText.backgroundColor = [UIColor whiteColor];
     [contentView addSubview:infoText];
     
     CGFloat btnY = CGRectGetMaxY(infoTextRect)+5;
