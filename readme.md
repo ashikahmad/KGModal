@@ -15,13 +15,17 @@ There are a couple other options but it's purposely designed to be simple and ea
 // Defaults to YES
 @property (nonatomic) BOOL tapOutsideToDismiss;
 
-// Determins if the close button or tapping outside the modal should animate the dismissal
+// Determines if the close button or tapping outside the modal should animate the dismissal
 // Defaults to YES
 @property (nonatomic) BOOL animateWhenDismissed;
 
 // Determins close button type (None/Left/Right)
 // Defaults to Left
 @property (nonatomic) KGModalCloseButtonType closeButtonType;
+
+// Determines whether close button will display on the left or right
+// Defaults to left
+@property (nonatomic) KGModalCloseButtonLocation closeButtonLocation;
 
 // The background color of the modal window
 // Defaults black with 0.5 opacity
@@ -56,3 +60,7 @@ There are a couple other options but it's purposely designed to be simple and ea
 ```
 
 Check out the ExampleApp to see it in action!
+
+###Installation via Cocoapods
+
+Add `pod 'KGModal', '~> 0.0.1'` to your `Podfile` and run `pod` to install.

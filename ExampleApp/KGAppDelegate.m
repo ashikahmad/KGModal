@@ -32,6 +32,12 @@
     [KGModal sharedInstance].closeButtonType = KGModalCloseButtonTypeRight;
     
     [self.window makeKeyAndVisible];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShow:) name:KGModalWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didShow:) name:KGModalDidShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willHide:) name:KGModalWillHideNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didHide:) name:KGModalDidHideNotification object:nil];
+
     return YES;
 }
 
@@ -76,22 +82,38 @@
     [[KGModal sharedInstance] showWithContentView:contentView andAnimated:YES];
 }
 
--(void) changeCloseButtonType:(id) sender {
-    UIButton *btn = (UIButton *) sender;
-    KGModal*modal = [KGModal sharedInstance];
+- (void)willShow:(NSNotification *)notification{
+    NSLog(@"will show");
+}
+
+- (void)didShow:(NSNotification *)notification{
+    NSLog(@"did show");
+}
+
+- (void)willHide:(NSNotification *)notification{
+    NSLog(@"will hide");
+}
+
+- (void)didHide:(NSNotification *)notification{
+    NSLog(@"did hide");
+}
+
+- (void)changeCloseButtonType:(id)sender{
+    UIButton *button = (UIButton *)sender;
+    KGModal *modal = [KGModal sharedInstance];
     KGModalCloseButtonType type = modal.closeButtonType;
     
     [modal endEditing:NO];
     
-    if (KGModalCloseButtonTypeLeft == type) {
+    if (type == KGModalCloseButtonTypeLeft) {
         modal.closeButtonType = KGModalCloseButtonTypeRight;
-        [btn setTitle:@"Close Button Right" forState:UIControlStateNormal];
-    } else if(KGModalCloseButtonTypeRight == type){
+        [button setTitle:@"Close Button Right" forState:UIControlStateNormal];
+    }else if(type == KGModalCloseButtonTypeRight){
         modal.closeButtonType = KGModalCloseButtonTypeNone;
-        [btn setTitle:@"Close Button None" forState:UIControlStateNormal];
-    } else {
+        [button setTitle:@"Close Button None" forState:UIControlStateNormal];
+    }else{
         modal.closeButtonType = KGModalCloseButtonTypeLeft;
-        [btn setTitle:@"Close Button Left" forState:UIControlStateNormal];
+        [button setTitle:@"Close Button Left" forState:UIControlStateNormal];
     }
 }
 
