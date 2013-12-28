@@ -7,3 +7,4 @@ user.*.espressostorage
 Sparkle/*.app
 *.zip
 PXListView
+*.xccheckout
